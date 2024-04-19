@@ -1,0 +1,33 @@
+﻿@model TelaCadastroEmailsEquipes.Models.tbl_cadastro
+
+@{
+    ViewBag.Title = "Cadastro";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Cadastro de Equipe e Email</h2>
+
+@using (Html.BeginForm("CadastrarEquipeEmail", "Email", FormMethod.Post))
+{
+    <div>
+        <label for="equipe">Equipe:</label>
+        @Html.TextBoxFor(model => model.equipe)
+        @Html.ValidationMessageFor(model => model.equipe)
+    </div>
+    <br />
+    <div>
+        <label for="email">Email:</label>
+        @Html.TextBoxFor(model => model.email)
+        @Html.ValidationMessageFor(model => model.email)
+    </div>
+    <br />
+    <div>
+        <label for="ativo">Ativo:</label>
+        @Html.CheckBoxFor(model => model.ativo)
+    </div>
+
+    <br />
+    <button type="submit">Cadastrar</button>
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+}

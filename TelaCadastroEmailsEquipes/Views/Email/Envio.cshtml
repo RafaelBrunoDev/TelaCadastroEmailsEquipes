@@ -1,0 +1,115 @@
+﻿@{
+    ViewBag.Title = "Envio";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Envio de Informações</h2>
+
+@using (Html.BeginForm())
+{
+    <label for="destinatarios">Destinatários:</label>
+
+    <div id="chipsContainer" style="display: flex; flex-wrap: wrap; border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
+    </div>
+
+    <div>
+        <label for="equipe" style="margin-top: 10px;">Equipe:</label>
+        @Html.DropDownList("equipe", ViewBag.Equipes as SelectList, "Selecione uma equipe", new { id = "equipeDropdown" })
+    </div>
+
+    <div>
+        <label for="emailAtendimento" style="margin-top: 10px;">Email Atendimento:</label>
+        @Html.DropDownList("emailAtendimento", ViewBag.EmailsAtendimento as SelectList, "Selecione um email de atendimento", new { id = "emailAtendimentoDropdown" })
+    </div>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#emailAtendimentoDropdown").change(function () {
+                var selectedEmail = $(this).val();
+                if (selectedEmail) {
+                    AdicionarDestinatario(selectedEmail);
+                }
+            });
+
+            function AdicionarDestinatario(email) {
+                var chipHtml = '<div class="chip" style="margin: 5px; padding: 8px; background-color: #f1f1f1; border: 1px solid #ccc; border-radius: 4px;">' +
+                    email +
+                    '<span class="close" onclick="RemoverDestinatario(this)" style="cursor: pointer; margin-left: 8px;">&times;</span>' +
+                    '</div>';
+                $("#chipsContainer").append(chipHtml);
+            }
+        });
+
+        function RemoverDestinatario(button) {
+            $(button).closest('.chip').remove();
+        }
+
+        $(document).ready(function () {
+            $("#equipeDropdown").change(function () {
+                PreencherDestinatarios();
+            });
+        });
+
+        function PreencherDestinatarios() {
+            var equipeSelecionada = $("#equipeDropdown").val();
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("ObterEmailsPorEquipe", "Email")",
+                data: { equipe: equipeSelecionada },
+                success: function (data) {
+                    exibirChips(data);
+                }
+            });
+        }
+
+        function exibirChips(emails) {
+            var chipsContainer = $("#chipsContainer");
+            chipsContainer.empty();
+
+            emails.forEach(function (email) {
+                var chip = $("<div class='email-chip'>" + email + "<span class='chip-close'>&times;</span></div>");
+                chip.find(".chip-close").click(function () {
+                    chip.remove();
+                    atualizarCampoDestinatarios();
+                });
+
+                chipsContainer.append(chip);
+            });
+
+            atualizarCampoDestinatarios();
+        }
+
+        function atualizarCampoDestinatarios() {
+            var destinatariosText = $(".email-chip").map(function () {
+                return $(this).text().trim();
+            }).get().join(";");
+
+            console.log(destinatariosText);
+        }
+    </script>
+
+    <div id="listaDestinatarios"></div>
+}
+
+@section scripts {
+    <style>
+        .email-chip {
+            background-color: #f1f1f1;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .chip-close {
+            margin-left: 5px;
+            cursor: pointer;
+        }
+    </style>
+}
